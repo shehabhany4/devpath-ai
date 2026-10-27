@@ -1,10 +1,10 @@
-import { Hello } from '@/components/Hello'
+import { Button } from '@/components/ui/button'
 
 function App() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-900">
-      <h1 className="text-4xl font-bold text-white">DevPath AI</h1>
-      <Hello />
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-background">
+      <h1 className="text-4xl font-bold text-foreground">DevPath AI</h1>
+      <Button>Get Started</Button>
     </div>
   )
 }
