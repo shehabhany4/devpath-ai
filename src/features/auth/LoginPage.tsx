@@ -1,13 +1,18 @@
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { loginSchema, type LoginValues } from './schemas'
+import { logIn } from './api'
 
 export function LoginPage() {
+  const navigate = useNavigate()
+  const [serverError, setServerError] = useState<string | null>(null)
+
   const {
     register,
     handleSubmit,
@@ -17,8 +22,13 @@ export function LoginPage() {
   })
 
   async function onSubmit(values: LoginValues) {
-    // مؤقتًا: هنوصّلها بـ Supabase بعد كده
-    console.log(values)
+    setServerError(null)
+    try {
+      await logIn(values)
+      navigate('/dashboard')
+    } catch (err) {
+      setServerError(err instanceof Error ? err.message : 'Something went wrong')
+    }
   }
 
   return (
@@ -44,6 +54,8 @@ export function LoginPage() {
                 <p className="text-destructive text-sm">{errors.password.message}</p>
               )}
             </div>
+
+            {serverError && <p className="text-destructive text-sm">{serverError}</p>}
 
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? 'Logging in...' : 'Log in'}
