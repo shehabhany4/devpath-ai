@@ -18,3 +18,11 @@ export async function getMyRoadmap() {
   const topics = [...data.roadmap_topics].sort((a, b) => a.position - b.position)
   return { ...data, roadmap_topics: topics }
 }
+
+export async function updateTopicStatus(topicId: string, status: TopicStatus) {
+  const { error } = await supabase
+    .from('roadmap_topics')
+    .update({ status })
+    .eq('id', topicId)
+  if (error) throw error
+}
