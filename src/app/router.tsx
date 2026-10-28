@@ -4,6 +4,7 @@ import { LoginPage } from '@/features/auth/LoginPage'
 import { SignupPage } from '@/features/auth/SignupPage'
 import { ProtectedRoute } from '@/features/auth/ProtectedRoute'
 import { DashboardPage } from '@/features/dashboard/DashboardPage'
+import { OnboardingPage } from '@/features/onboarding/OnboardingPage'
 
 export const router = createBrowserRouter([
   { path: '/', element: <LandingPage /> },
@@ -11,6 +12,9 @@ export const router = createBrowserRouter([
   { path: '/signup', element: <SignupPage /> },
   {
     element: <ProtectedRoute />,
-    children: [{ path: '/dashboard', element: <DashboardPage /> }],
+    children: [
+      { path: '/onboarding', element: <OnboardingPage /> },
+      { path: '/dashboard', element: <DashboardPage /> },
+    ],
   },
 ])

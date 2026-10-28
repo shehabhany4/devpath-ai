@@ -20,3 +20,11 @@ export const signupSchema = z
   })
 
 export type SignupValues = z.infer<typeof signupSchema>
+
+export const onboardingSchema = z.object({
+  goal: z.string().min(1, 'Please choose a goal'),
+  level: z.enum(['beginner', 'intermediate', 'advanced']),
+  daily_minutes: z.coerce.number().min(15, 'At least 15 minutes').max(480, 'Max 8 hours'),
+})
+
+export type OnboardingValues = z.infer<typeof onboardingSchema>
