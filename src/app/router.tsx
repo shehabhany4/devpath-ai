@@ -3,6 +3,7 @@ import { LandingPage } from '@/features/landing/LandingPage'
 import { LoginPage } from '@/features/auth/LoginPage'
 import { SignupPage } from '@/features/auth/SignupPage'
 import { ProtectedRoute } from '@/features/auth/ProtectedRoute'
+import { OnboardingGuard } from '@/features/auth/OnboardingGuard'
 import { DashboardPage } from '@/features/dashboard/DashboardPage'
 import { OnboardingPage } from '@/features/onboarding/OnboardingPage'
 
@@ -14,7 +15,10 @@ export const router = createBrowserRouter([
     element: <ProtectedRoute />,
     children: [
       { path: '/onboarding', element: <OnboardingPage /> },
-      { path: '/dashboard', element: <DashboardPage /> },
+      {
+        element: <OnboardingGuard />,
+        children: [{ path: '/dashboard', element: <DashboardPage /> }],
+      },
     ],
   },
 ])

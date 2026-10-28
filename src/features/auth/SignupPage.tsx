@@ -25,7 +25,7 @@ export function SignupPage() {
     setServerError(null)
     try {
       await signUp(values)
-      navigate('/dashboard')
+      navigate('/onboarding')
     } catch (err) {
       setServerError(err instanceof Error ? err.message : 'Something went wrong')
     }
