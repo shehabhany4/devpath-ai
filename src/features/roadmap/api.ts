@@ -26,3 +26,15 @@ export async function updateTopicStatus(topicId: string, status: TopicStatus) {
     .eq('id', topicId)
   if (error) throw error
 }
+
+export async function generateRoadmap(input: {
+  goal: string
+  level: 'beginner' | 'intermediate' | 'advanced'
+  daily_minutes: number
+}) {
+  const { data, error } = await supabase.functions.invoke('generate-roadmap', {
+    body: input,
+  })
+  if (error) throw error
+  return data as { roadmap_id: string }
+}

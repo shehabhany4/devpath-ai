@@ -1,6 +1,8 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { z } from 'npm:zod@3'
 
+const GEMINI_MODELS = ['gemini-3.6-flash', 'gemini-3.5-flash-lite']
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -27,6 +29,36 @@ function json(body: unknown, status = 200) {
   })
 }
 
+async function callGemini(model: string, body: string) {
+  return await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': Deno.env.get('GEMINI_API_KEY')!,
+      },
+      body,
+    },
+  )
+}
+
+async function callWithFallback(body: string) {
+  let last: Response | null = null
+  for (const model of GEMINI_MODELS) {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const res = await callGemini(model, body)
+      if (res.ok) return res
+      last = res
+      console.error('Gemini error:', model, res.status, await res.clone().text())
+      // نعيد المحاولة بس لو الخطأ مؤقت
+      if (res.status !== 503 && res.status !== 429) break
+      await new Promise((r) => setTimeout(r, 1500))
+    }
+  }
+  return last!
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
@@ -51,42 +83,34 @@ Deno.serve(async (req) => {
     // 3) نادي Gemini
     const prompt = `Create a learning roadmap for someone who wants to become a ${goal}.
 Level: ${level}. Available time: ${daily_minutes} minutes per day.
-Return 6 to 10 ordered topics, from first to last.`
+Return 6 to 10 ordered topics, from first to last. Do not number the titles.`
 
-    const geminiRes = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-goog-api-key': Deno.env.get('GEMINI_API_KEY')!,
-        },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            responseMimeType: 'application/json',
-            responseSchema: {
-              type: 'OBJECT',
-              properties: {
-                title: { type: 'STRING' },
-                topics: {
-                  type: 'ARRAY',
-                  items: {
-                    type: 'OBJECT',
-                    properties: {
-                      title: { type: 'STRING' },
-                      description: { type: 'STRING' },
-                    },
-                    required: ['title', 'description'],
-                  },
+    const geminiBody = JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: {
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: 'OBJECT',
+          properties: {
+            title: { type: 'STRING' },
+            topics: {
+              type: 'ARRAY',
+              items: {
+                type: 'OBJECT',
+                properties: {
+                  title: { type: 'STRING' },
+                  description: { type: 'STRING' },
                 },
+                required: ['title', 'description'],
               },
-              required: ['title', 'topics'],
             },
           },
-        }),
+          required: ['title', 'topics'],
+        },
       },
-    )
+    })
+
+    const geminiRes = await callWithFallback(geminiBody)
     if (!geminiRes.ok) return json({ error: 'AI service failed' }, 502)
 
     const geminiData = await geminiRes.json()
@@ -94,7 +118,10 @@ Return 6 to 10 ordered topics, from first to last.`
 
     // 4) Validation لرد الـ AI قبل الحفظ
     const output = outputSchema.safeParse(JSON.parse(text))
-    if (!output.success) return json({ error: 'AI returned invalid data' }, 502)
+    if (!output.success) {
+      console.error('Invalid AI output:', text)
+      return json({ error: 'AI returned invalid data' }, 502)
+    }
 
     // 5) احفظ في الـ Database (بصلاحيات المستخدم، فالـ RLS شغال)
     const { data: roadmap, error: roadmapError } = await supabase
@@ -102,7 +129,10 @@ Return 6 to 10 ordered topics, from first to last.`
       .insert({ user_id: userData.user.id, title: output.data.title, goal })
       .select('id')
       .single()
-    if (roadmapError) return json({ error: 'Failed to save roadmap' }, 500)
+    if (roadmapError) {
+      console.error('Roadmap insert error:', roadmapError)
+      return json({ error: 'Failed to save roadmap' }, 500)
+    }
 
     const { error: topicsError } = await supabase.from('roadmap_topics').insert(
       output.data.topics.map((t, i) => ({
@@ -112,10 +142,14 @@ Return 6 to 10 ordered topics, from first to last.`
         description: t.description,
       })),
     )
-    if (topicsError) return json({ error: 'Failed to save topics' }, 500)
+    if (topicsError) {
+      console.error('Topics insert error:', topicsError)
+      return json({ error: 'Failed to save topics' }, 500)
+    }
 
     return json({ roadmap_id: roadmap.id })
-  } catch {
+  } catch (err) {
+    console.error('Unhandled error:', err)
     return json({ error: 'Something went wrong' }, 500)
   }
 })
