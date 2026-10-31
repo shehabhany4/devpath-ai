@@ -69,6 +69,83 @@ export type Database = {
         }
         Relationships: []
       }
+      quiz_attempts: {
+        Row: {
+          answers: Json
+          created_at: string
+          id: string
+          quiz_id: string
+          score: number
+          topic_id: string
+          total: number
+          user_id: string
+        }
+        Insert: {
+          answers: Json
+          created_at?: string
+          id?: string
+          quiz_id: string
+          score: number
+          topic_id: string
+          total: number
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          created_at?: string
+          id?: string
+          quiz_id?: string
+          score?: number
+          topic_id?: string
+          total?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_attempts_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quiz_attempts_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "roadmap_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quizzes: {
+        Row: {
+          created_at: string
+          id: string
+          questions: Json
+          topic_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          questions: Json
+          topic_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          questions?: Json
+          topic_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quizzes_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: true
+            referencedRelation: "roadmap_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       roadmap_topics: {
         Row: {
           created_at: string
