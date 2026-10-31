@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowRight, LogOut, Map } from 'lucide-react'
+import { ArrowRight, Bot, LogOut, Map } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -32,14 +32,20 @@ export function DashboardPage() {
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-12">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-3xl font-bold">
           Welcome, {user?.user_metadata.full_name ?? user?.email}
         </h1>
-        <Button variant="outline" onClick={handleLogout}>
-          <LogOut className="size-4" />
-          Log out
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" render={<Link to="/mentor" />}>
+            <Bot className="size-4" />
+            AI Mentor
+          </Button>
+          <Button variant="outline" onClick={handleLogout}>
+            <LogOut className="size-4" />
+            Log out
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (
