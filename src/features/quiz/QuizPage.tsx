@@ -23,6 +23,9 @@ export function QuizPage() {
   if (isLoading)
     return (
       <main className="mx-auto max-w-2xl space-y-4 px-6 py-12" aria-busy="true">
+        <p className="text-muted-foreground text-center text-sm">
+          Generating your quiz, this may take a moment...
+        </p>
         <Skeleton className="h-8 w-1/2" />
         <Skeleton className="h-32 w-full" />
         <Skeleton className="h-32 w-full" />
@@ -85,9 +88,6 @@ export function QuizPage() {
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">
-        <p className="text-muted-foreground text-center text-sm">
-  Generating your quiz, this may take a moment...
-</p>
       {backLink}
       <h1 className="mt-6 text-3xl font-bold">Quiz</h1>
 
