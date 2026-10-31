@@ -1,0 +1,1 @@
+npx supabase gen types typescript --project-id atudkrtggkzxbhbqfpyp | Out-File -Encoding utf8 src/types/database.ts

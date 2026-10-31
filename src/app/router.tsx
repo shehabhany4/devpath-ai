@@ -7,6 +7,8 @@ import { OnboardingGuard } from '@/features/auth/OnboardingGuard'
 import { DashboardPage } from '@/features/dashboard/DashboardPage'
 import { OnboardingPage } from '@/features/onboarding/OnboardingPage'
 import { RoadmapPage } from '@/features/roadmap/RoadmapPage'
+import { TopicDetailsPage } from '@/features/roadmap/TopicDetailsPage'
+
 
 export const router = createBrowserRouter([
   { path: '/', element: <LandingPage /> },
@@ -21,6 +23,7 @@ export const router = createBrowserRouter([
         children: [
           { path: '/dashboard', element: <DashboardPage /> },
           { path: '/roadmap', element: <RoadmapPage /> },
+          { path: '/roadmap/:topicId', element: <TopicDetailsPage /> },
         ],
       },
     ],

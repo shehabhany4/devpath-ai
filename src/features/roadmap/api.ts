@@ -38,3 +38,29 @@ export async function generateRoadmap(input: {
   if (error) throw error
   return data as { roadmap_id: string }
 }
+
+export type TopicDetails = {
+  overview: string
+  key_points: string[]
+  steps: string[]
+}
+
+export async function getTopicWithDetails(topicId: string) {
+  const { data: topic, error } = await supabase
+    .from('roadmap_topics')
+    .select('*')
+    .eq('id', topicId)
+    .single()
+  if (error) throw error
+
+  if (topic.details) {
+    return { ...topic, details: topic.details as unknown as TopicDetails }
+  }
+
+  const { data, error: fnError } = await supabase.functions.invoke(
+    'generate-topic-details',
+    { body: { topic_id: topicId } },
+  )
+  if (fnError) throw fnError
+  return { ...topic, details: (data as { details: TopicDetails }).details }
+}

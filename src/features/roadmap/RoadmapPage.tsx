@@ -35,9 +35,9 @@ export function RoadmapPage() {
     })
   }
 
-if (isLoading) return <RoadmapSkeleton />
-if (generate.isPending) return <RoadmapSkeleton />
-if (error) return <p className="text-destructive p-6">Failed to load roadmap</p>
+  if (isLoading) return <RoadmapSkeleton />
+  if (generate.isPending) return <RoadmapSkeleton />
+  if (error) return <p className="text-destructive p-6">Failed to load roadmap</p>
 
   if (!roadmap)
     return (
@@ -107,7 +107,9 @@ if (error) return <p className="text-destructive p-6">Failed to load roadmap</p>
                 />
               </button>
               <div>
-                <h2 className="font-semibold">{topic.title}</h2>
+                <Link to={`/roadmap/${topic.id}`} className="hover:text-primary">
+                  <h2 className="font-semibold">{topic.title}</h2>
+                </Link>
                 <p className="text-muted-foreground text-sm">{topic.description}</p>
               </div>
             </li>
