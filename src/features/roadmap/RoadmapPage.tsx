@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { CheckCircle2, Circle, Loader2, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useProfile } from '@/features/auth/useProfile'
@@ -47,6 +48,9 @@ export function RoadmapPage() {
         {generate.isError && (
           <p className="text-destructive text-sm">Something went wrong. Try again.</p>
         )}
+        <Link to="/dashboard" className="text-muted-foreground hover:text-foreground text-sm">
+          ← Back to dashboard
+        </Link>
       </main>
     )
 
@@ -55,7 +59,11 @@ export function RoadmapPage() {
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">
-      <div className="flex items-start justify-between gap-4">
+      <Link to="/dashboard" className="text-muted-foreground hover:text-foreground text-sm">
+        ← Back to dashboard
+      </Link>
+
+      <div className="mt-4 flex items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">{roadmap.title}</h1>
           <p className="text-muted-foreground mt-2">
