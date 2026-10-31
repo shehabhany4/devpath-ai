@@ -7,7 +7,10 @@ export function Markdown({ children }: { children: string }) {
       remarkPlugins={[remarkGfm]}
       components={{
         pre: ({ children }) => (
-          <pre className="bg-background my-2 overflow-x-auto rounded-md p-3 text-xs">
+          <pre
+            dir="ltr"
+            className="bg-background my-2 overflow-x-auto rounded-md p-3 text-left text-xs"
+          >
             {children}
           </pre>
         ),
@@ -19,10 +22,20 @@ export function Markdown({ children }: { children: string }) {
               {children}
             </code>
           ),
-        p: ({ children }) => <p className="my-2 first:mt-0 last:mb-0">{children}</p>,
-        ul: ({ children }) => <ul className="my-2 list-disc space-y-1 pl-5">{children}</ul>,
+        p: ({ children }) => (
+          <p dir="auto" className="my-2 first:mt-0 last:mb-0">
+            {children}
+          </p>
+        ),
+        ul: ({ children }) => (
+          <ul dir="auto" className="my-2 list-disc space-y-1 ps-5">
+            {children}
+          </ul>
+        ),
         ol: ({ children }) => (
-          <ol className="my-2 list-decimal space-y-1 pl-5">{children}</ol>
+          <ol dir="auto" className="my-2 list-decimal space-y-1 ps-5">
+            {children}
+          </ol>
         ),
         a: ({ children, href }) => (
           <a
@@ -34,9 +47,21 @@ export function Markdown({ children }: { children: string }) {
             {children}
           </a>
         ),
-        h1: ({ children }) => <h3 className="mt-3 text-base font-bold">{children}</h3>,
-        h2: ({ children }) => <h3 className="mt-3 text-base font-bold">{children}</h3>,
-        h3: ({ children }) => <h3 className="mt-3 text-sm font-bold">{children}</h3>,
+        h1: ({ children }) => (
+          <h3 dir="auto" className="mt-3 text-base font-bold">
+            {children}
+          </h3>
+        ),
+        h2: ({ children }) => (
+          <h3 dir="auto" className="mt-3 text-base font-bold">
+            {children}
+          </h3>
+        ),
+        h3: ({ children }) => (
+          <h3 dir="auto" className="mt-3 text-sm font-bold">
+            {children}
+          </h3>
+        ),
       }}
     >
       {children}
