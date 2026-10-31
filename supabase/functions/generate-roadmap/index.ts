@@ -59,6 +59,10 @@ async function callWithFallback(body: string) {
   return last!
 }
 
+function stripNumbering(title: string) {
+  return title.replace(/^\s*\d+[\.\)\-:]\s*/, '').trim()
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
@@ -138,7 +142,7 @@ Return 6 to 10 ordered topics, from first to last. Do not number the titles.`
       output.data.topics.map((t, i) => ({
         roadmap_id: roadmap.id,
         position: i + 1,
-        title: t.title,
+        title: stripNumbering(t.title),
         description: t.description,
       })),
     )
