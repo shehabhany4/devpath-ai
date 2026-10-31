@@ -31,3 +31,14 @@ entrypoint = "./functions/get-quiz/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/get-quiz/*.html" ]
+
+[functions.submit-quiz]
+enabled = true
+verify_jwt = false
+import_map = "./functions/submit-quiz/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/submit-quiz/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/submit-quiz/*.html" ]
