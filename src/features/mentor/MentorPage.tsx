@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Plus, Send } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Markdown } from '@/components/Markdown'
 import { useAuth } from '@/features/auth/AuthProvider'
 import {
   createThread,
@@ -128,7 +129,7 @@ export function MentorPage() {
             <Bubble key={m.id} role={m.role} text={m.content} />
           ))}
           {pendingUser && <Bubble role="user" text={pendingUser} />}
-          {pendingUser && <Bubble role="assistant" text={streamed || '...'} />}
+          {pendingUser && <Bubble role="assistant" text={streamed || '▍'} />}
           <div ref={bottomRef} />
         </div>
 
@@ -162,11 +163,11 @@ function Bubble({ role, text }: { role: 'user' | 'assistant'; text: string }) {
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
       <div
-        className={`max-w-[85%] rounded-xl px-4 py-2 text-sm whitespace-pre-wrap ${
-          isUser ? 'bg-primary text-primary-foreground' : 'bg-muted'
+        className={`max-w-[85%] rounded-xl px-4 py-2 text-sm ${
+          isUser ? 'bg-primary text-primary-foreground whitespace-pre-wrap' : 'bg-muted'
         }`}
       >
-        {text}
+        {isUser ? text : <Markdown>{text}</Markdown>}
       </div>
     </div>
   )
