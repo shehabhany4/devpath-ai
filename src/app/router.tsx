@@ -8,6 +8,7 @@ import { DashboardPage } from '@/features/dashboard/DashboardPage'
 import { OnboardingPage } from '@/features/onboarding/OnboardingPage'
 import { RoadmapPage } from '@/features/roadmap/RoadmapPage'
 import { TopicDetailsPage } from '@/features/roadmap/TopicDetailsPage'
+import { QuizPage } from '@/features/quiz/QuizPage'
 
 
 export const router = createBrowserRouter([
@@ -24,6 +25,7 @@ export const router = createBrowserRouter([
           { path: '/dashboard', element: <DashboardPage /> },
           { path: '/roadmap', element: <RoadmapPage /> },
           { path: '/roadmap/:topicId', element: <TopicDetailsPage /> },
+          { path: '/roadmap/:topicId/quiz', element: <QuizPage /> },
         ],
       },
     ],

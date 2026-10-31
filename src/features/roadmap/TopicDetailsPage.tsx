@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
+import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useTopicDetails } from './useTopicDetails'
 
@@ -43,6 +44,10 @@ export function TopicDetailsPage() {
               <li key={s}>{s}</li>
             ))}
           </ol>
+
+          <Button className="mt-8" render={<Link to={`/roadmap/${topicId}/quiz`} />}>
+            Take quiz
+          </Button>
         </>
       )}
     </main>

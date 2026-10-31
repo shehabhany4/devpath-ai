@@ -8,7 +8,7 @@ const corsHeaders = {
 
 const inputSchema = z.object({
   quiz_id: z.string().uuid(),
-  answers: z.array(z.number().int().min(0).max(3)).min(1).max(20),
+  answers: z.array(z.number().int().min(0).max(2)).min(1).max(20),
 })
 
 const storedQuestionsSchema = z.array(

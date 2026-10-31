@@ -14,13 +14,13 @@ const questionsSchema = z
   .array(
     z.object({
       question: z.string().min(1),
-      options: z.array(z.string().min(1)).length(4),
-      correct_index: z.number().int().min(0).max(3),
+      options: z.array(z.string().min(1)).length(3),
+      correct_index: z.number().int().min(0).max(2),
       explanation: z.string().min(1),
     }),
   )
-  .min(3)
-  .max(8)
+  .min(6)
+  .max(10)
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -108,10 +108,17 @@ Deno.serve(async (req) => {
     }
 
     const goal = (topic.roadmaps as { goal: string } | null)?.goal ?? 'developer'
-    const prompt = `Create a multiple-choice quiz with 5 questions about "${topic.title}"
+    const prompt = `Create a multiple-choice quiz with exactly 8 questions about "${topic.title}"
 for someone learning to become a ${goal}. Context: ${topic.description ?? ''}
-Each question has exactly 4 options, one correct answer (correct_index from 0 to 3),
-and a short explanation. Vary the position of the correct answer.`
+
+Requirements:
+- Cover the main sub-topics of this topic, not just the basics.
+- Mix difficulty: about 3 easy, 3 medium, and 2 hard questions.
+- Each question has exactly 3 options, one correct answer (correct_index from 0 to 2).
+- Keep every question and every option short.
+- Keep each explanation to one short sentence.
+- Vary the position of the correct answer.
+- Do not repeat the same idea in two questions.`
 
     const geminiBody = JSON.stringify({
       contents: [{ parts: [{ text: prompt }] }],
