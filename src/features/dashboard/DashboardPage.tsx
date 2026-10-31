@@ -6,11 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { logOut } from '@/features/auth/api'
 import { useRoadmap } from '@/features/roadmap/useRoadmap'
+import { useTopicScores } from '@/features/quiz/useTopicScores'
 
 export function DashboardPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const { data: roadmap, isLoading } = useRoadmap()
+  const { data: scores = [] } = useTopicScores()
 
   async function handleLogout() {
     await logOut()
@@ -22,6 +24,11 @@ export function DashboardPage() {
   const percent = topics.length ? Math.round((done / topics.length) * 100) : 0
   const nextTopic =
     topics.find((t) => t.status === 'in_progress') ?? topics.find((t) => t.status === 'todo')
+
+  const weak = scores
+    .filter((s) => s.last_percent < 60)
+    .map((s) => ({ ...s, topic: topics.find((t) => t.id === s.topic_id) }))
+    .filter((s) => s.topic)
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-12">
@@ -78,6 +85,28 @@ export function DashboardPage() {
                 <p className="text-muted-foreground text-sm">
                   All topics completed. Great job! 🎉
                 </p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="sm:col-span-2">
+            <CardHeader>
+              <CardTitle>Needs review</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {weak.length === 0 ? (
+                <p className="text-muted-foreground text-sm">
+                  Nothing to review yet. Take a quiz to see where you stand.
+                </p>
+              ) : (
+                weak.map((w) => (
+                  <div key={w.topic_id} className="flex items-center justify-between gap-4">
+                    <Link to={`/roadmap/${w.topic_id}`} className="hover:text-primary text-sm">
+                      {w.topic?.title}
+                    </Link>
+                    <span className="text-destructive text-sm">{w.last_percent}%</span>
+                  </div>
+                ))
               )}
             </CardContent>
           </Card>
