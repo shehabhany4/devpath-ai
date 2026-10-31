@@ -6,6 +6,7 @@ import { useRoadmap } from './useRoadmap'
 import type { TopicStatus } from './api'
 import { useUpdateTopicStatus } from './useUpdateTopicStatus'
 import { useGenerateRoadmap } from './useGenerateRoadmap'
+import { RoadmapSkeleton } from './RoadmapSkeleton'
 
 const statusIcon: Record<TopicStatus, typeof Circle> = {
   todo: Circle,
@@ -34,8 +35,9 @@ export function RoadmapPage() {
     })
   }
 
-  if (isLoading) return <p className="text-muted-foreground p-6">Loading...</p>
-  if (error) return <p className="text-destructive p-6">Failed to load roadmap</p>
+if (isLoading) return <RoadmapSkeleton />
+if (generate.isPending) return <RoadmapSkeleton />
+if (error) return <p className="text-destructive p-6">Failed to load roadmap</p>
 
   if (!roadmap)
     return (
