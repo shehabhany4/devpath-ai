@@ -1,8 +1,10 @@
 import { supabase } from '@/lib/supabase'
 import type { Database } from '@/types/database'
 
+type ChatMessageRow = Database['public']['Tables']['chat_messages']['Row']
+
 export type ChatThread = Database['public']['Tables']['chat_threads']['Row']
-export type ChatMessage = Database['public']['Tables']['chat_messages']['Row']
+export type ChatMessage = Omit<ChatMessageRow, 'role'> & { role: 'user' | 'assistant' }
 export type ChatStyle = 'simple' | 'detailed' | 'code'
 
 export async function getThreads() {
@@ -31,7 +33,7 @@ export async function getMessages(threadId: string) {
     .eq('thread_id', threadId)
     .order('created_at', { ascending: true })
   if (error) throw error
-  return data
+  return data as ChatMessage[]
 }
 
 // بنقرا الـ Stream بـ fetch لأن supabase.functions.invoke مش بيدعم البث
