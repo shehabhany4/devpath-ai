@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { CheckCircle2, Circle, Loader2, Sparkles } from 'lucide-react'
+import { CheckCircle2, Circle, Loader2, RefreshCw, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useProfile } from '@/features/auth/useProfile'
 import { useRoadmap } from './useRoadmap'
@@ -7,6 +7,7 @@ import type { TopicStatus } from './api'
 import { useUpdateTopicStatus } from './useUpdateTopicStatus'
 import { useGenerateRoadmap } from './useGenerateRoadmap'
 import { RoadmapSkeleton } from './RoadmapSkeleton'
+
 
 const statusIcon: Record<TopicStatus, typeof Circle> = {
   todo: Circle,
@@ -72,10 +73,16 @@ export function RoadmapPage() {
             {done} of {total} topics completed
           </p>
         </div>
-        <Button variant="outline" onClick={handleGenerate} disabled={generate.isPending}>
-          <Sparkles className="size-4" />
-          {generate.isPending ? 'Generating...' : 'New roadmap'}
-        </Button>
+        <div className="flex gap-2">
+  <Button variant="outline" render={<Link to="/onboarding?edit=1" />}>
+    <RefreshCw className="size-4" />
+    Change track
+  </Button>
+  <Button variant="outline" onClick={handleGenerate} disabled={generate.isPending}>
+    <Sparkles className="size-4" />
+    {generate.isPending ? 'Generating...' : 'New roadmap'}
+  </Button>
+</div>
       </div>
 
       {generate.isError && (
@@ -106,6 +113,7 @@ export function RoadmapPage() {
                   }
                 />
               </button>
+              
               <div>
                 <Link to={`/roadmap/${topic.id}`} className="hover:text-primary">
                   <h2 className="font-semibold">{topic.title}</h2>

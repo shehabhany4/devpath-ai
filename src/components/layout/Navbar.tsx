@@ -1,6 +1,7 @@
 import { Code2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
+import { ThemeToggle } from './ThemeToggle'
 
 const links = [
   { label: 'Features', href: '#features' },
@@ -29,7 +30,8 @@ export function Navbar() {
           ))}
         </ul>
 
-        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
+          <ThemeToggle />
           <Button variant="ghost" render={<Link to="/login" />}>
             Log in
           </Button>
