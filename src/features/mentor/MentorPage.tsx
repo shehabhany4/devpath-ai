@@ -20,6 +20,8 @@ const styles: { value: ChatStyle; label: string }[] = [
   { value: 'code', label: 'Code examples' },
 ]
 
+const LIMIT_MESSAGE = 'Daily limit reached. Try again tomorrow.'
+
 export function MentorPage() {
   const { user } = useAuth()
   const queryClient = useQueryClient()
@@ -71,8 +73,12 @@ export function MentorPage() {
       )
       await queryClient.invalidateQueries({ queryKey: ['messages', id] })
       await queryClient.invalidateQueries({ queryKey: ['threads'] })
-    } catch {
-      setError('Something went wrong. Try again.')
+    } catch (err) {
+      setError(
+        err instanceof Error && err.message === LIMIT_MESSAGE
+          ? LIMIT_MESSAGE
+          : 'Something went wrong. Try again.',
+      )
     } finally {
       setPendingUser(null)
       setStreamed('')
@@ -163,6 +169,7 @@ function Bubble({ role, text }: { role: 'user' | 'assistant'; text: string }) {
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
       <div
+        dir="auto"
         className={`max-w-[85%] rounded-xl px-4 py-2 text-sm ${
           isUser ? 'bg-primary text-primary-foreground whitespace-pre-wrap' : 'bg-muted'
         }`}

@@ -3,11 +3,12 @@ import { Link, useParams } from 'react-router-dom'
 import { CheckCircle2, XCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { ErrorMessage } from '@/components/ErrorMessage'
 import { useQuiz, useSubmitQuiz } from './useQuiz'
 
 export function QuizPage() {
   const { topicId = '' } = useParams()
-  const { data: quiz, isLoading, error } = useQuiz(topicId)
+  const { data: quiz, isLoading, error, refetch } = useQuiz(topicId)
   const submit = useSubmitQuiz()
   const [answers, setAnswers] = useState<Record<number, number>>({})
 
@@ -36,7 +37,11 @@ export function QuizPage() {
     return (
       <main className="mx-auto max-w-2xl px-6 py-12">
         {backLink}
-        <p className="text-destructive mt-6">Failed to load the quiz. Try again.</p>
+        <ErrorMessage
+          error={error}
+          fallback="Failed to load the quiz."
+          onRetry={() => refetch()}
+        />
       </main>
     )
 
@@ -116,7 +121,7 @@ export function QuizPage() {
       </ol>
 
       {submit.isError && (
-        <p className="text-destructive mt-4 text-sm">Something went wrong. Try again.</p>
+        <ErrorMessage error={submit.error} fallback="Couldn't submit your answers." />
       )}
 
       <Button

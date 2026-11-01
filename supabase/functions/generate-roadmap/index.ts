@@ -1,5 +1,6 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { z } from 'npm:zod@3'
+import { checkAndRecord } from '../_shared/rateLimit.ts'
 
 const GEMINI_MODELS = ['gemini-3.6-flash', 'gemini-3.5-flash-lite']
 
@@ -84,7 +85,12 @@ Deno.serve(async (req) => {
     if (!parsed.success) return json({ error: 'Invalid input' }, 400)
     const { goal, level, daily_minutes } = parsed.data
 
-    // 3) نادي Gemini
+    // 3) Rate limiting
+    if (!(await checkAndRecord(userData.user.id, 'generate-roadmap'))) {
+      return json({ error: 'Daily limit reached. Try again tomorrow.' }, 429)
+    }
+
+    // 4) نادي Gemini
     const prompt = `Create a learning roadmap for someone who wants to become a ${goal}.
 Level: ${level}. Available time: ${daily_minutes} minutes per day.
 Return 6 to 10 ordered topics, from first to last. Do not number the titles.`
@@ -120,14 +126,14 @@ Return 6 to 10 ordered topics, from first to last. Do not number the titles.`
     const geminiData = await geminiRes.json()
     const text = geminiData.candidates?.[0]?.content?.parts?.[0]?.text
 
-    // 4) Validation لرد الـ AI قبل الحفظ
+    // 5) Validation لرد الـ AI قبل الحفظ
     const output = outputSchema.safeParse(JSON.parse(text))
     if (!output.success) {
       console.error('Invalid AI output:', text)
       return json({ error: 'AI returned invalid data' }, 502)
     }
 
-    // 5) احفظ في الـ Database (بصلاحيات المستخدم، فالـ RLS شغال)
+    // 6) احفظ في الـ Database (بصلاحيات المستخدم، فالـ RLS شغال)
     const { data: roadmap, error: roadmapError } = await supabase
       .from('roadmaps')
       .insert({ user_id: userData.user.id, title: output.data.title, goal })

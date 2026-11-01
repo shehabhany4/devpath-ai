@@ -1,11 +1,12 @@
 import { Link, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { ErrorMessage } from '@/components/ErrorMessage'
 import { useTopicDetails } from './useTopicDetails'
 
 export function TopicDetailsPage() {
   const { topicId = '' } = useParams()
-  const { data: topic, isLoading, error } = useTopicDetails(topicId)
+  const { data: topic, isLoading, error, refetch } = useTopicDetails(topicId)
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">
@@ -23,7 +24,11 @@ export function TopicDetailsPage() {
       )}
 
       {error && (
-        <p className="text-destructive mt-6">Failed to load topic details. Try again.</p>
+        <ErrorMessage
+          error={error}
+          fallback="Failed to load topic details."
+          onRetry={() => refetch()}
+        />
       )}
 
       {topic && (

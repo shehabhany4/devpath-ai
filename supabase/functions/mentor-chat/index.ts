@@ -1,7 +1,8 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { z } from 'npm:zod@3'
+import { checkAndRecord } from '../_shared/rateLimit.ts'
 
-const GEMINI_MODELS = ['gemini-3.6-flash', 'gemini-3.5-flash-lite']
+const GEMINI_MODELS = ['gemini-3.5-flash-lite', 'gemini-3.6-flash']
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -78,13 +79,18 @@ Deno.serve(async (req) => {
       .maybeSingle()
     if (!thread) return json({ error: 'Thread not found' }, 404)
 
-    // آخر 10 رسايل كسياق
+    // Rate limiting
+    if (!(await checkAndRecord(userData.user.id, 'mentor-chat'))) {
+      return json({ error: 'Daily limit reached. Try again tomorrow.' }, 429)
+    }
+
+    // آخر 6 رسايل كسياق
     const { data: history } = await supabase
       .from('chat_messages')
       .select('role, content')
       .eq('thread_id', thread_id)
       .order('created_at', { ascending: false })
-      .limit(10)
+      .limit(6)
 
     const contents = [
       ...(history ?? []).reverse().map((m) => ({
@@ -99,11 +105,13 @@ Deno.serve(async (req) => {
         parts: [
           {
             text: `You are DevPath AI Mentor, a friendly programming tutor. ${styleInstructions[style]}
-Answer only programming and tech-career questions. Reply in the same language as the user.`,
+Answer only programming and tech-career questions. Reply in the same language as the user.
+Keep answers concise: at most about 150 words unless the user asks for more detail.`,
           },
         ],
       },
       contents,
+      generationConfig: { maxOutputTokens: 1200 },
     })
 
     const geminiRes = await openGeminiStream(geminiBody)

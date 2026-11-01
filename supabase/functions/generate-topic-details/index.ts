@@ -1,5 +1,6 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { z } from 'npm:zod@3'
+import { checkAndRecord } from '../_shared/rateLimit.ts'
 
 const GEMINI_MODELS = ['gemini-3.6-flash', 'gemini-3.5-flash-lite']
 
@@ -78,8 +79,13 @@ Deno.serve(async (req) => {
       .single()
     if (topicError || !topic) return json({ error: 'Topic not found' }, 404)
 
-    // لو الشرح موجود، رجّعه من غير ما نكلّم الـ AI
+    // لو الشرح موجود، رجّعه من غير ما نكلّم الـ AI (ومن غير ما يتحسب)
     if (topic.details) return json({ details: topic.details })
+
+    // Rate limiting
+    if (!(await checkAndRecord(userData.user.id, 'generate-topic-details'))) {
+      return json({ error: 'Daily limit reached. Try again tomorrow.' }, 429)
+    }
 
     const goal = (topic.roadmaps as { goal: string } | null)?.goal ?? 'developer'
     const prompt = `Explain the topic "${topic.title}" for someone learning to become a ${goal}.

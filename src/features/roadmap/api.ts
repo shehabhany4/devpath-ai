@@ -5,6 +5,19 @@ export type Roadmap = Database['public']['Tables']['roadmaps']['Row']
 export type RoadmapTopic = Database['public']['Tables']['roadmap_topics']['Row']
 export type TopicStatus = RoadmapTopic['status']
 
+export const RATE_LIMIT_MESSAGE = 'Daily limit reached. Try again tomorrow.'
+
+// بتنادي Edge Function وتحوّل خطأ 429 لرسالة واضحة
+export async function invokeFunction<T>(name: string, body: unknown): Promise<T> {
+  const { data, error } = await supabase.functions.invoke(name, { body })
+  if (error) {
+    const status = (error as { context?: Response }).context?.status
+    if (status === 429) throw new Error(RATE_LIMIT_MESSAGE)
+    throw error
+  }
+  return data as T
+}
+
 export async function getMyRoadmap() {
   const { data, error } = await supabase
     .from('roadmaps')
@@ -32,11 +45,7 @@ export async function generateRoadmap(input: {
   level: 'beginner' | 'intermediate' | 'advanced'
   daily_minutes: number
 }) {
-  const { data, error } = await supabase.functions.invoke('generate-roadmap', {
-    body: input,
-  })
-  if (error) throw error
-  return data as { roadmap_id: string }
+  return invokeFunction<{ roadmap_id: string }>('generate-roadmap', input)
 }
 
 export type TopicDetails = {
@@ -57,10 +66,8 @@ export async function getTopicWithDetails(topicId: string) {
     return { ...topic, details: topic.details as unknown as TopicDetails }
   }
 
-  const { data, error: fnError } = await supabase.functions.invoke(
-    'generate-topic-details',
-    { body: { topic_id: topicId } },
-  )
-  if (fnError) throw fnError
-  return { ...topic, details: (data as { details: TopicDetails }).details }
+  const data = await invokeFunction<{ details: TopicDetails }>('generate-topic-details', {
+    topic_id: topicId,
+  })
+  return { ...topic, details: data.details }
 }

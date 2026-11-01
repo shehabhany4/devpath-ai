@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase'
+import { invokeFunction } from '@/features/roadmap/api'
 
 export type QuizQuestion = { question: string; options: string[] }
 
@@ -16,17 +16,11 @@ export type QuizResult = {
 }
 
 export async function getQuiz(topicId: string) {
-  const { data, error } = await supabase.functions.invoke('get-quiz', {
-    body: { topic_id: topicId },
+  return invokeFunction<{ quiz_id: string; questions: QuizQuestion[] }>('get-quiz', {
+    topic_id: topicId,
   })
-  if (error) throw error
-  return data as { quiz_id: string; questions: QuizQuestion[] }
 }
 
 export async function submitQuiz(quizId: string, answers: number[]) {
-  const { data, error } = await supabase.functions.invoke('submit-quiz', {
-    body: { quiz_id: quizId, answers },
-  })
-  if (error) throw error
-  return data as QuizResult
+  return invokeFunction<QuizResult>('submit-quiz', { quiz_id: quizId, answers })
 }

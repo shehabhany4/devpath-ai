@@ -1,5 +1,6 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { z } from 'npm:zod@3'
+import { checkAndRecord } from '../_shared/rateLimit.ts'
 
 const GEMINI_MODELS = ['gemini-3.6-flash', 'gemini-3.5-flash-lite']
 
@@ -105,6 +106,11 @@ Deno.serve(async (req) => {
     if (existing) {
       const questions = questionsSchema.parse(existing.questions)
       return json({ quiz_id: existing.id, questions: publicQuestions(questions) })
+    }
+
+    // Rate limiting (التوليد الجديد بس)
+    if (!(await checkAndRecord(userData.user.id, 'get-quiz'))) {
+      return json({ error: 'Daily limit reached. Try again tomorrow.' }, 429)
     }
 
     const goal = (topic.roadmaps as { goal: string } | null)?.goal ?? 'developer'

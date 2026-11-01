@@ -61,6 +61,7 @@ export async function streamMentorReply(
       }),
     },
   )
+  if (res.status === 429) throw new Error('Daily limit reached. Try again tomorrow.')
   if (!res.ok || !res.body) throw new Error('Mentor request failed')
 
   const reader = res.body.getReader()
